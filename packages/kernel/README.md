@@ -91,6 +91,114 @@ Chargement des variables d’environnement (`.env`) et gestion des modes :
 
 ---
 
+## 8. Contracts fondamentaux
+
+Le Kernel définit un ensemble de contrats publics qui servent de langage commun entre tous les modules du framework Velt.
+
+Ces contrats ne contiennent aucune logique métier : ils définissent uniquement les règles de communication.
+
+### Liste des contrats publics
+
+1. **ApplicationInterface**
+
+Représente l'application Velt en cours d'execution, il definit le noyau public de l'application.
+
+- accès container
+- accès configuration
+- accès au chemin racine
+- gestion environement minimale
+
+Elle expose :
+
+```array
+- basePatch() : chemin racine du projet
+- container() : container service
+- config() : repository de configuration
+- environment() : environnement courant
+```
+
+et permet de detecter :
+
+```array
+- isLocal()
+- isProduction()
+- isTesting()
+```
+
+2. **ContainerInterface**
+
+Représente le système d’injection de dépendances.
+
+Permet :
+
+```array
+- bind() : lier un service
+- singleton() : service partagé
+- make() : résoudre un service
+- has() : verifier une entrée
+```
+
+3. **ConfigRepositoryInterface**
+
+Représente le système de configuration.
+
+Permet :
+
+```array
+- get(string $key, mixed $default = null)
+- set(string $key, mixed $value)
+- has(string $key)
+- all(): array
+```
+
+Les clés utilisent la notation par points :
+
+```text
+database.connections.mysql.host
+```
+
+4. **ArrayableInterface**
+
+Permet de convertir un objet en tableau.
+
+```text
+toArray(): array
+```
+
+5. **JsonableInterface**
+
+Permet de convertir un objet en JSON.
+
+```text
+toJson(): string
+```
+
+6. **RenderableInterface**
+
+Permet de rendre un objet en chaîne de caractères.
+
+```text
+render(): string
+```
+
+### Role des contrats
+
+Les contrats du Kernel :
+
+- définissent le langage du framework
+- permettent la communication entre modules
+- évitent le couplage entre implémentations
+- servent de base à toutes les futures implémentations
+
+### Règles importantes
+
+Les contrats :
+
+- ne contiennent aucune logique métier
+- ne dépendent d’aucun module Velt
+- doivent rester stables dans le temps
+- constituent l’API publique du Kernel
+
 ## Ce que le Kernel ne fait PAS
 
 Le Kernel ne doit jamais gérer :
@@ -151,7 +259,7 @@ vendor/bin/phpunit
 
 ## Exemple de test actuel
 
-```bash
+```php
 use PHPUnit\Framework\TestCase;
 use Velt\Kernel\Application;
 
