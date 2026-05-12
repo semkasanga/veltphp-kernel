@@ -1,0 +1,25 @@
+# Dependencies
+/vendor/
+
+# Composer
+composer.lock
+
+# PHPUnit cache / logs
+.phpunit.result.cache
+coverage/
+coverage.xml
+
+# IDE / OS files
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Temporary / runtime files
+*.log
+*.cache
+*.tmp
+
+# Test artifacts
+build/
+phpunit.xml.cache
