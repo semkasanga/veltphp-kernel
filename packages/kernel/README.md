@@ -199,6 +199,83 @@ Les contrats :
 - doivent rester stables dans le temps
 - constituent l’API publique du Kernel
 
+---
+
+# 9. Container de services
+
+Le Kernel fournit un container de services minimal permettant d’enregistrer et résoudre des dépendances internes du framework.
+
+Le container constitue le cœur du runtime Velt.
+
+Tous les futurs modules du framework (HTTP, CLI, UI, Database, Preview, Events, Config) utiliseront ce container pour communiquer et résoudre leurs dépendances.
+
+### Objectif du container
+
+Le container Velt a pour rôle de :
+
+- centraliser les services internes ;
+- gérer les dépendances partagées ;
+- permettre une architecture découplée ;
+- fournir une base stable au runtime du framework.
+
+Le container actuel est volontairement minimaliste afin de rester :
+
+- prévisible ;
+- simple à maintenir ;
+- testable ;
+- indépendant des autres modules.
+
+### Fonctionnalités disponibles
+
+Le container supporte actuellement :
+
+| Méthode       | Rôle                              |
+| ------------- | --------------------------------- |
+| `bind()`      | Enregistre un service             |
+| `singleton()` | Enregistre un service partagé     |
+| `instance()`  | Enregistre une instance existante |
+| `get()`       | Résout un service                 |
+| `has()`       | Vérifie l’existence d’un service  |
+
+### Fonctionnement interne
+
+Le container repose sur trois registres internes :
+
+| Registre      | Rôle                                 |
+| ------------- | ------------------------------------ |
+| `$bindings`   | Stocke les resolvers des services    |
+| `$instances`  | Stocke les instances déjà résolues   |
+| `$singletons` | Indique quels services sont partagés |
+
+### Exemples d’utilisation
+
+#### 1. Enregistrer un service simple
+
+```php
+use Velt\Kernel\Container;
+
+$container = new Container();
+
+$container->bind(
+    'config',
+    fn () => new ConfigRepository()
+);
+
+$config = $container->get('config');
+
+$container->singleton(
+    'app',
+    fn () => new Application()
+);
+
+$app1 = $container->get('app');
+$app2 = $container->get('app');
+
+var_dump($app1 === $app2); // true
+```
+
+---
+
 ## Ce que le Kernel ne fait PAS
 
 Le Kernel ne doit jamais gérer :
@@ -238,6 +315,7 @@ Les dépendances suivantes sont interdites dans le Kernel :
 ## Installation (future)
 
 Le Kernel sera installé via Composer dans un projet Velt :
+
 ```bash
 composer require velt/kernel
 ```

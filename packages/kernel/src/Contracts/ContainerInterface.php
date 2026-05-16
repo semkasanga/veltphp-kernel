@@ -10,28 +10,33 @@ namespace Velt\Kernel\Contracts;
 interface ContainerInterface
 {
     /**
-     * Lie une abstraction dans le container.
+     * Lie un service dans le container.
      *
-     * @param mixed $concrete
+     * @param callable|string $resolver
      */
-    public function bind(string $abstract, mixed $concrete): void;
+    public function bind(string $id, callable|string $resolver): void;
 
     /**
-     * Lie une instance partagée (singleton).
+     * Lie un singleton dans le container.
      *
-     * @param mixed $concrete
+     * @param callable|string $resolver
      */
-    public function singleton(string $abstract, mixed $concrete): void;
+    public function singleton(string $id, callable|string $resolver): void;
 
     /**
-     * Résout une entrée du container.
+     * Enregistre une instance existante.
+     */
+    public function instance(string $id, object $instance): void;
+
+    /**
+     * Vérifie si un service existe.
+     */
+    public function has(string $id): bool;
+
+    /**
+     * Résout un service depuis le container.
      *
      * @return mixed
      */
-    public function make(string $abstract): mixed;
-
-    /**
-     * Vérifie si une entrée existe dans le container.
-     */
-    public function has(string $abstract): bool;
+    public function get(string $id): mixed;
 }

@@ -9,31 +9,37 @@ use Velt\Kernel\Contracts\ContainerInterface;
 
 final class FakeContainer implements ContainerInterface
 {
-    private array $bindings = [];
+    /**
+     * @var array<string, mixed>
+     */
+    private array $items = [];
 
-    public function bind(string $abstract, mixed $concrete): void
+    public function bind(string $id, callable|string $resolver): void
     {
-        $this->bindings[$abstract] = $concrete;
+        $this->items[$id] = $resolver;
     }
 
-    public function singleton(string $abstract, mixed $concrete): void
+    public function singleton(string $id, callable|string $resolver): void
     {
-        $this->bindings[$abstract] = $concrete;
+        $this->items[$id] = $resolver;
     }
 
-    public function make(string $abstract): mixed
+    public function instance(string $id, object $instance): void
     {
-        if (! $this->has($abstract)) {
-            throw new RuntimeException(
-                "Nothing bound in container for key [{$abstract}]."
-            );
+        $this->items[$id] = $instance;
+    }
+
+    public function has(string $id): bool
+    {
+        return isset($this->items[$id]);
+    }
+
+    public function get(string $id): mixed
+    {
+        if (! isset($this->items[$id])) {
+            throw new RuntimeException("Service not found.");
         }
 
-        return $this->bindings[$abstract];
-    }
-
-    public function has(string $abstract): bool
-    {
-        return array_key_exists($abstract, $this->bindings);
+        return $this->items[$id];
     }
 }
