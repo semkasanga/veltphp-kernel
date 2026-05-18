@@ -694,6 +694,84 @@ les dépendances HTTP...
 
 -----
 
+### 14. Renforcer le Container (Autowiring + PSR-11 minimal)
+
+#### Objectif
+
+Cette issue transforme le container du Kernel Velt d’un simple registry de services vers un container d’injection de dépendances minimal avec autowiring contrôlé.
+
+L’objectif est d’introduire une résolution automatique des classes tout en gardant un comportement explicite et prévisible.
+
+#### Fonctionnalités ajoutées
+##### 1. Autowiring de classes concrètes
+
+Le container peut maintenant résoudre une classe sans binding préalable :
+
+```php 
+$service = $container->get(UserService::class);
+```
+
+Si la classe existe et est instanciable, elle est automatiquement construite.
+
+##### 2. Injection par constructeur (Reflection)
+
+Les dépendances de type objet sont automatiquement résolues :
+
+```php
+class UserService
+{
+    public function __construct(Logger $logger)
+    {
+    }
+}
+```
+
+Le container va automatiquement injecter Logger.
+
+
+##### 3. Support des bindings classiques
+
+Les méthodes existantes restent inchangées :
+
+```bash
+bind()
+singleton()
+instance()
+has()
+get()
+```
+
+##### 4. Singletons persistants
+
+Un service déclaré en singleton est instancié une seule fois :
+
+```php
+$container->singleton('logger', Logger::class);
+```
+
+##### 5.Résolution intelligente des closures
+
+Les closures reçoivent désormais le container :
+
+```php
+$container->bind('service', function (Container $container) {
+    return new Service($container->get(Logger::class));
+});
+```
+
+##### 6. Exceptions explicites
+
+Le container lève des exceptions claires en cas d’erreur :
+
+```bash
+Service introuvable
+Classe non instanciable
+Dépendance scalaire non résoluble
+Paramètre constructeur inconnu
+```
+
+----
+
 ## Ce que le Kernel ne fait PAS
 
 Le Kernel ne doit jamais gérer :
