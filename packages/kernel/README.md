@@ -201,7 +201,7 @@ Les contrats :
 
 ---
 
-# 9. Container de services
+## 9. Container de services
 
 Le Kernel fournit un container de services minimal permettant d’enregistrer et résoudre des dépendances internes du framework.
 
@@ -376,7 +376,110 @@ $config->get('app.timezone', 'UTC');
 
 ```
 
-----
+---
+
+## 10. Service Providers et Lifecycle
+
+Le Kernel fournit désormais un système minimal de Service Providers permettant aux modules Velt de s’enregistrer proprement dans l’application.
+
+Cette architecture permet de garder le Kernel indépendant des modules HTTP, CLI, UI, Database ou Preview.
+
+### Objectif des Service Providers
+
+Les Service Providers servent à :
+
+- enregistrer des services dans le container ;
+- démarrer des composants après initialisation ;
+- étendre l’application sans couplage fort ;
+- standardiser le cycle de vie des modules Velt.
+
+Chaque module futur pourra exposer son propre provider :
+
+```php
+$app->registerProvider(HttpServiceProvider::class);
+
+$app->registerProvider(DatabaseServiceProvider::class);
+```
+
+### Cycle de vie de l'application
+
+Le cycle de vie minimal d’une application Velt est désormais :
+
+```bash
+
+1. load environment : Charge les variables d’environnement (.env) et définit le mode de l’application (local, testing, production).
+
+2. load configuration : Charge les fichiers/configurations nécessaires au fonctionnement de l’application.
+
+3. register providers : Enregistre tous les services et dépendances dans le container.
+
+4. boot providers : Démarre et initialise les services après leur enregistrement.
+
+5. handle request or command : Exécute la requête HTTP, la commande CLI ou le runtime demandé.
+
+6. send response or output : Retourne une réponse HTTP, un JSON, un affichage console ou une sortie runtime.
+
+7. terminate : Termine proprement le cycle d’exécution et libère les ressources si nécessaire.
+
+```
+
+### Contract ServiceProviderInterface
+
+le kernel expose maintenant : 
+
+```php
+Velt\Kernel\Contracts\ServiceProviderInterface
+```
+
+avec deux méthodes :
+
+```php
+register(): void
+
+boot(): void
+```
+
+- register() : enregistrer des servives dans le container
+
+exemple : 
+
+```php
+$this->app
+    ->container()
+    ->singleton(...);
+```
+
+- boot() : démarrer des services après leur enregistrement
+
+elle permet de : 
+
+- démarrer des services ;
+- initialiser des composants ;
+- enregistrer des listeners ;
+- finaliser le runtime.
+
+### Classe abstraite ServiceProvider
+
+le kernel fournit une classe abstraite :
+
+```php
+Velt\Kernel\ServiceProvider
+```
+
+elle fourni l'app directement via : `$this->app`
+
+
+### Application runtime
+
+La classe `Application` supporte maintenant :
+
+```php
+registerProvider()
+
+boot()
+```
+
+---
 
 ## Ce que le Kernel ne fait PAS
 

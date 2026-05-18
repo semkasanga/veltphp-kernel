@@ -44,6 +44,8 @@ final class Container implements ContainerInterface
     public function instance(string $id, object $instance): void
     {
         $this->instances[$id] = $instance;
+        $this->bindings[$id] = $instance;
+        $this->singletons[$id] = true;
     }
 
     public function has(string $id): bool
