@@ -5,10 +5,12 @@ declare(strict_types=1);
 namespace Velt\Kernel;
 
 use InvalidArgumentException;
+use Velt\Kernel\Env\EnvRepository;
 use Velt\Kernel\Config\ConfigRepository;
 use Velt\Kernel\Contracts\ApplicationInterface;
 use Velt\Kernel\Contracts\ConfigRepositoryInterface;
 use Velt\Kernel\Contracts\ContainerInterface;
+use Velt\Kernel\Contracts\EnvRepositoryInterface;
 use Velt\Kernel\Contracts\EventDispatcherInterface;
 use Velt\Kernel\Contracts\ServiceProviderInterface;
 
@@ -23,6 +25,8 @@ final class Application implements ApplicationInterface
     private ConfigRepositoryInterface $config;
 
     private EventDispatcherInterface $events;
+
+    private EnvRepositoryInterface $env;
 
     /**
      * Providers enregistrés.
@@ -43,13 +47,22 @@ final class Application implements ApplicationInterface
         string $basePath,
         array $config = []
     ) {
-        $this->basePath = rtrim($basePath, DIRECTORY_SEPARATOR);
+        $this->basePath = rtrim(
+            $basePath,
+            DIRECTORY_SEPARATOR
+        );
 
         $this->container = new Container();
 
-        $this->config = new ConfigRepository($config);
+        $this->config = new ConfigRepository(
+            $config
+        );
 
         $this->events = new EventDispatcher();
+
+        $this->env = new EnvRepository();
+
+        $this->loadEnvironment();
 
         $this->registerBaseBindings();
     }
@@ -74,9 +87,17 @@ final class Application implements ApplicationInterface
         return $this->events;
     }
 
+    public function env(): EnvRepositoryInterface
+    {
+        return $this->env;
+    }
+
     public function environment(): string
     {
-        return $this->config->get('app.env', 'production');
+        return (string) $this->env->get(
+            'APP_ENV',
+            'production'
+        );
     }
 
     public function isLocal(): bool
@@ -92,6 +113,14 @@ final class Application implements ApplicationInterface
     public function isTesting(): bool
     {
         return $this->environment() === 'testing';
+    }
+
+    public function isDebug(): bool
+    {
+        return (bool) $this->env->get(
+            'APP_DEBUG',
+            false
+        );
     }
 
     public function registerProvider(
@@ -143,15 +172,42 @@ final class Application implements ApplicationInterface
 
         $this->booted = true;
 
-        $this->events->dispatch('application.booted');
+        $this->events->dispatch(
+            'application.booted'
+        );
     }
 
     private function registerBaseBindings(): void
     {
-        $this->container->instance('app', $this);
+        $this->container->instance(
+            'app',
+            $this
+        );
 
-        $this->container->instance('config', $this->config);
+        $this->container->instance(
+            'config',
+            $this->config
+        );
 
-        $this->container->instance('events', $this->events);
+        $this->container->instance(
+            'events',
+            $this->events
+        );
+
+        $this->container->instance(
+            'env',
+            $this->env
+        );
+    }
+
+    private function loadEnvironment(): void
+    {
+        $envPath = $this->basePath . DIRECTORY_SEPARATOR . '.env';
+
+        if (! file_exists($envPath)) {
+            return;
+        }
+
+        $this->env->load($envPath);
     }
 }

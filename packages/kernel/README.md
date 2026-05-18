@@ -555,10 +555,70 @@ Le EventDispatcher garantit :
 - comportement déterministe ;
 - tests isolés sans dépendances externes.
 
-
-
-
 ---
+
+## 12. Gestion des variables d’environnement
+
+Le Kernel intègre un système minimal de gestion des variables d’environnement.
+
+Les variables sont chargées automatiquement depuis un fichier `.env` situé à la racine de l’application.
+
+### Exemple de fichier `.env`
+
+```env
+APP_NAME=Velt
+APP_ENV=local
+APP_DEBUG=true
+```
+
+### Repository ENV
+
+Le système repose sur un EnvRepository dédié.
+
+Il permet :
+
+- de lire des variables d’environnement ;
+- de définir des valeurs runtime ;
+- de charger un fichier .env ;
+- de fournir des valeurs par défaut.
+
+### Modes application supportés
+
+Le Kernel reconnaît officiellement les modes suivants :
+
+```bash
+local
+testing
+production
+```
+
+### Helpers runtime
+
+```php
+$app->environment();
+
+$app->isLocal();
+
+$app->isTesting();
+
+$app->isProduction();
+
+$app->isDebug();
+```
+### Casting automatique
+
+Les valeurs suivantes sont automatiquement converties :
+
+| Valeur `.env` | Type runtime  |
+| ------------- | ------------- |
+| `true`        | `bool(true)`  |
+| `false`       | `bool(false)` |
+| `null`        | `null`        |
+| `empty`       | `''`          |
+
+-----
+-----
+-----
 
 ## Ce que le Kernel ne fait PAS
 
