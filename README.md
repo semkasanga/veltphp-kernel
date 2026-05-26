@@ -36,7 +36,7 @@ Exclus :
 
 ## Comment tester sans les autres modules
 
-Le kernel ne doit attendre aucun autre package Velt. Les tests doivent donc utiliser uniquement PHP, PHPUnit et des classes factices locales.
+Le kernel core doit rester testable sans autres packages Velt. Les tests du noyau doivent donc utiliser uniquement PHP, PHPUnit et des classes factices locales.
 
 - Pour tester le container, creer de petites classes fake dans `tests/Fixtures`.
 - Pour tester les providers, creer un `FakeServiceProvider` qui enregistre une valeur simple dans le container.
@@ -44,7 +44,7 @@ Le kernel ne doit attendre aucun autre package Velt. Les tests doivent donc util
 - Pour tester l'exception handler, utiliser une exception generique et verifier qu'elle devient un objet d'erreur abstrait ou une structure compatible response, sans dependre de `veltphp/http`.
 - Pour tester `.env`, utiliser un dossier temporaire avec un fichier `.env.testing` ou `.env` minimal.
 
-Le kernel est termine seulement s'il peut prouver qu'il ne depend d'aucune classe `Velt\Http`, `Velt\UI`, `Velt\Database`, `Velt\Cli` ou `Velt\Preview`.
+Le kernel est termine seulement s'il peut prouver qu'il ne depend d'aucune classe `Velt\Http`, `Velt\Database`, `Velt\Cli` ou `Velt\Preview`, et que les integrations optionnelles comme `velt/ui` restent autonomes, sans dependance circulaire.
 
 ## Issues
 

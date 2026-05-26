@@ -10,7 +10,7 @@ Son rôle est de fournir une infrastructure minimale, stable et indépendante pe
 
 Le Kernel est volontairement :
 
-- indépendant de tout module (HTTP, CLI, UI, Database, Preview)
+- indépendant des chemins locaux et des couplages circulaires
 - minimaliste
 - testable en isolation
 - extensible via contrats et providers
@@ -22,7 +22,7 @@ Le Kernel est volontairement :
 Le Kernel repose sur les principes suivants :
 
 - **Simplicité** : uniquement ce qui est essentiel au fonctionnement du framework
-- **Isolation** : aucune dépendance vers les autres modules Velt
+- **Isolation** : aucun couplage fort ni dépendance circulaire
 - **Extensibilité** : tout passe par des contrats et des extensions propres
 - **Testabilité** : le kernel doit fonctionner seul, sans autre composant
 - **Prévisibilité** : pas de magie cachée, comportement explicite
@@ -382,7 +382,7 @@ $config->get('app.timezone', 'UTC');
 
 Le Kernel fournit désormais un système minimal de Service Providers permettant aux modules Velt de s’enregistrer proprement dans l’application.
 
-Cette architecture permet de garder le Kernel indépendant des modules HTTP, CLI, UI, Database ou Preview.
+Cette architecture permet de garder le Kernel découplé des couches HTTP, CLI, Database ou Preview, tout en laissant des packages UI autonomes s’enregistrer via des providers.
 
 ### Objectif des Service Providers
 
@@ -792,8 +792,8 @@ Ces responsabilités appartiennent à des modules dédiés.
 Le Kernel impose une règle stricte de dépendances :
 
 ```text
-Kernel → indépendant de tous les modules
-Modules → dépendent du Kernel
+Kernel → noyau central, stable
+Modules / packages → s’enregistrent via le Kernel
 ```
 
 Les dépendances suivantes sont interdites dans le Kernel :
@@ -801,10 +801,11 @@ Les dépendances suivantes sont interdites dans le Kernel :
 ```text
 - Velt\Http
 - Velt\Cli
-- Velt\UI
 - Velt\Database
 - Velt\Preview
 ```
+
+Le package UI autonome `velt/ui` peut etre consomme via un provider dedie, mais le Kernel ne doit ni copier son code ni creer de dependance circulaire.
 
 ---
 
