@@ -24,8 +24,14 @@ final class JsonableInterfaceTest extends TestCase
     {
         $fake = new FakeJsonable();
 
+        $json = $fake->toJson();
+
+        $this->assertIsString(
+            $json
+        );
+
         $this->assertJson(
-            $fake->toJson()
+            $json
         );
     }
 

@@ -167,10 +167,21 @@ toArray(): array
 
 5. **JsonableInterface**
 
-Permet de convertir un objet en JSON.
+JsonableInterface peut retourner :
 
-```text
-toJson(): string
+- une chaîne JSON déjà encodée ;
+- un tableau PHP qui sera encodé par le transport HTTP.
+
+Exemples :
+
+```php
+return '{"message":"ok"}';
+
+ou
+
+return [
+    'message' => 'ok',
+];
 ```
 
 6. **RenderableInterface**
@@ -209,7 +220,6 @@ Le container constitue le cœur du runtime Velt.
 
 Tous les futurs modules du framework (HTTP, CLI, UI, Database, Preview, Events, Config) utiliseront ce container pour communiquer et résoudre leurs dépendances.
 
-
 ### Objectif du container
 
 Le container Velt a pour rôle de :
@@ -226,31 +236,27 @@ Le container actuel est volontairement minimaliste afin de rester :
 - testable ;
 - indépendant des autres modules.
 
-
 ### Fonctionnalités disponibles
 
 Le container supporte actuellement :
 
-| Méthode | Rôle |
-|---|---|
-| `bind()` | Enregistre un service |
-| `singleton()` | Enregistre un service partagé |
-| `instance()` | Enregistre une instance existante |
-| `get()` | Résout un service |
-| `has()` | Vérifie l’existence d’un service |
-
+| Méthode       | Rôle                              |
+| ------------- | --------------------------------- |
+| `bind()`      | Enregistre un service             |
+| `singleton()` | Enregistre un service partagé     |
+| `instance()`  | Enregistre une instance existante |
+| `get()`       | Résout un service                 |
+| `has()`       | Vérifie l’existence d’un service  |
 
 ### Fonctionnement interne
 
 Le container repose sur trois registres internes :
 
-| Registre | Rôle |
-|---|---|
-| `$bindings` | Stocke les resolvers des services |
-| `$instances` | Stocke les instances déjà résolues |
+| Registre      | Rôle                                 |
+| ------------- | ------------------------------------ |
+| `$bindings`   | Stocke les resolvers des services    |
+| `$instances`  | Stocke les instances déjà résolues   |
 | `$singletons` | Indique quels services sont partagés |
-
-
 
 ### Exemples d’utilisation
 
@@ -425,7 +431,7 @@ Le cycle de vie minimal d’une application Velt est désormais :
 
 ### Contract ServiceProviderInterface
 
-le kernel expose maintenant : 
+le kernel expose maintenant :
 
 ```php
 Velt\Kernel\Contracts\ServiceProviderInterface
@@ -441,7 +447,7 @@ boot(): void
 
 - register() : enregistrer des servives dans le container
 
-exemple : 
+exemple :
 
 ```php
 $this->app
@@ -451,7 +457,7 @@ $this->app
 
 - boot() : démarrer des services après leur enregistrement
 
-elle permet de : 
+elle permet de :
 
 - démarrer des services ;
 - initialiser des composants ;
@@ -467,7 +473,6 @@ Velt\Kernel\ServiceProvider
 ```
 
 elle fourni l'app directement via : `$this->app`
-
 
 ### Application runtime
 
@@ -487,9 +492,10 @@ Le Kernel intègre désormais un système d’événements synchrone minimal per
 
 Ce système n’est pas le système d’événements applicatif complet (qui sera introduit plus tard). Il est exclusivement destiné aux hooks internes du cycle de vie du Kernel.
 
-### Role 
+### Role
 
 Le dispatcher permet de :
+
 ```bash
 - enregistrer des listeners sur des événements ;
 - déclencher des événements synchrones ;
@@ -531,7 +537,6 @@ Le dispatcher garantit :
 - propagation des exceptions ;
 - absence de dépendances externes ;
 - simplicité maximale (pas de queue, async ou middleware).
-
 
 ### Intégration dans le lifecycle
 
@@ -605,6 +610,7 @@ $app->isProduction();
 
 $app->isDebug();
 ```
+
 ### Casting automatique
 
 Les valeurs suivantes sont automatiquement converties :
@@ -616,7 +622,7 @@ Les valeurs suivantes sont automatiquement converties :
 | `null`        | `null`        |
 | `empty`       | `''`          |
 
------
+---
 
 ## 13. Gestion centralisée des exceptions
 
@@ -628,7 +634,6 @@ Ce composant permet :
 - de transformer les exceptions en structure exploitable ;
 - de différencier les comportements debug et production ;
 - de préparer l’intégration HTTP, CLI et Preview.
-
 
 ### Philosophie
 
@@ -643,13 +648,12 @@ Le handler retourne uniquement une structure d’erreur neutre.
 
 Les autres modules Velt seront responsables du rendu final :
 
-| Module | Transformation |
-|---|---|
-| HTTP | HTML / JSON |
-| CLI | sortie terminal |
-| Preview | overlay debug |
-| Mobile | écran erreur |
-
+| Module  | Transformation  |
+| ------- | --------------- |
+| HTTP    | HTML / JSON     |
+| CLI     | sortie terminal |
+| Preview | overlay debug   |
+| Mobile  | écran erreur    |
 
 ### ExceptionHandlerInterface
 
@@ -692,7 +696,7 @@ l’exposition des secrets ;
 les traces complètes en production ;
 les dépendances HTTP...
 
------
+---
 
 ### 14. Renforcer le Container (Autowiring + PSR-11 minimal)
 
@@ -703,11 +707,12 @@ Cette issue transforme le container du Kernel Velt d’un simple registry de ser
 L’objectif est d’introduire une résolution automatique des classes tout en gardant un comportement explicite et prévisible.
 
 #### Fonctionnalités ajoutées
+
 ##### 1. Autowiring de classes concrètes
 
 Le container peut maintenant résoudre une classe sans binding préalable :
 
-```php 
+```php
 $service = $container->get(UserService::class);
 ```
 
@@ -727,7 +732,6 @@ class UserService
 ```
 
 Le container va automatiquement injecter Logger.
-
 
 ##### 3. Support des bindings classiques
 
@@ -770,7 +774,7 @@ Dépendance scalaire non résoluble
 Paramètre constructeur inconnu
 ```
 
-----
+---
 
 ## Ce que le Kernel ne fait PAS
 
@@ -812,6 +816,7 @@ Le package UI autonome `velt/ui` peut etre consomme via un provider dedie, mais 
 ## Installation (future)
 
 Le Kernel sera installé via Composer dans un projet Velt :
+
 ```bash
 composer require velt/kernel
 ```
@@ -874,6 +879,5 @@ Le Kernel est considéré comme valide si :
  - aucune dépendance vers d’autres modules Velt
  - le Kernel fonctionne en isolation totale
 ```
-
 
 SEM - KASANGA - KISAMU / Lundi 18 Mai 2026 / 17h15

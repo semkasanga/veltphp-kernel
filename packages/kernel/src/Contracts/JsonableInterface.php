@@ -10,7 +10,13 @@ namespace Velt\Kernel\Contracts;
 interface JsonableInterface
 {
     /**
-     * Convertit l'objet en chaîne JSON.
+     * Convertit l'objet en JSON.
+     *
+     * Peut retourner :
+     * - une chaîne JSON déjà encodée ;
+     * - un tableau PHP à encoder.
+     *
+     * @return string|array<mixed>
      */
-    public function toJson(): string;
+    public function toJson(): string|array;
 }

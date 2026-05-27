@@ -8,7 +8,7 @@ use Velt\Kernel\Contracts\JsonableInterface;
 
 final class FakeJsonable implements JsonableInterface
 {
-    public function toJson(): string
+    public function toJson(): string|array
     {
         return json_encode([
             'name' => 'Velt',

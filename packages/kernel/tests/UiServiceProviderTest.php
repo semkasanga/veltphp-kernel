@@ -18,7 +18,10 @@ final class UiServiceProviderTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->basePath = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'velt-kernel-ui-' . uniqid('', true);
+        $this->basePath = sys_get_temp_dir()
+            . DIRECTORY_SEPARATOR
+            . 'velt-kernel-ui-'
+            . uniqid('', true);
 
         $this->writeView(
             'resources/views/auth/login.velt.php',
@@ -57,75 +60,261 @@ PHP
     public function test_kernel_can_resolve_ui_services_and_render_views(): void
     {
         $app = new Application($this->basePath);
-        $app->registerProvider(UiServiceProvider::class);
+
+        $app->registerProvider(
+            UiServiceProvider::class
+        );
 
         $container = $app->container();
 
-        $viewFactory = $container->get(ViewFactory::class);
-        $this->assertInstanceOf(ViewFactory::class, $viewFactory);
-        $this->assertSame($viewFactory, $container->get('view'));
+        $viewFactory = $container->get(
+            ViewFactory::class
+        );
 
-        $page = $viewFactory->make('auth.login');
-        $this->assertInstanceOf(Page::class, $page);
-        $this->assertSame('Connexion', $page->title());
-        $this->assertSame('auth', $page->getLayout());
+        $this->assertInstanceOf(
+            ViewFactory::class,
+            $viewFactory
+        );
 
-        $webRenderer = $container->get(WebRenderer::class);
-        $this->assertInstanceOf(WebRenderer::class, $webRenderer);
-        $this->assertSame($webRenderer, $container->get('ui.renderer.web'));
+        $this->assertSame(
+            $viewFactory,
+            $container->get('view')
+        );
+
+        $page = $viewFactory->make(
+            'auth.login'
+        );
+
+        $this->assertInstanceOf(
+            Page::class,
+            $page
+        );
+
+        $this->assertSame(
+            'Connexion',
+            $page->title()
+        );
+
+        $this->assertSame(
+            'auth',
+            $page->getLayout()
+        );
+
+        $webRenderer = $container->get(
+            WebRenderer::class
+        );
+
+        $this->assertInstanceOf(
+            WebRenderer::class,
+            $webRenderer
+        );
+
+        $this->assertSame(
+            $webRenderer,
+            $container->get('ui.renderer.web')
+        );
 
         $html = $webRenderer->render($page);
 
-        $this->assertStringContainsString('<h1>Connexion</h1>', $html);
-        $this->assertStringContainsString('action="/login"', $html);
-        $this->assertStringNotContainsString('_token', $html);
+        $this->assertStringContainsString(
+            '<h1>Connexion</h1>',
+            $html
+        );
 
-        $jsonRenderer = $container->get(JsonRenderer::class);
-        $this->assertInstanceOf(JsonRenderer::class, $jsonRenderer);
-        $this->assertSame($jsonRenderer, $container->get('ui.renderer.json'));
+        $this->assertStringContainsString(
+            'action="/login"',
+            $html
+        );
 
-        $preview = json_decode($jsonRenderer->render($page), true, 512, JSON_THROW_ON_ERROR);
+        $this->assertStringNotContainsString(
+            '_token',
+            $html
+        );
 
-        $this->assertSame(1, $preview['schemaVersion']);
-        $this->assertSame('Connexion', $preview['screen']);
-        $this->assertSame('auth', $preview['layout']);
-        $this->assertSame(['title' => 'Connexion - Velt App'], $preview['meta']);
-        $this->assertCount(2, $preview['components']);
-        $this->assertSame('Text', $preview['components'][0]['type']);
-        $this->assertSame('Connexion', $preview['components'][0]['content']);
-        $this->assertSame('Form', $preview['components'][1]['type']);
-        $this->assertSame('POST', $preview['components'][1]['props']['method']);
-        $this->assertSame('/login', $preview['components'][1]['props']['action']);
-        $this->assertTrue($preview['components'][1]['props']['csrf']);
+        $jsonRenderer = $container->get(
+            JsonRenderer::class
+        );
+
+        $this->assertInstanceOf(
+            JsonRenderer::class,
+            $jsonRenderer
+        );
+
+        $this->assertSame(
+            $jsonRenderer,
+            $container->get('ui.renderer.json')
+        );
+
+        $preview = json_decode(
+            $jsonRenderer->render($page),
+            true,
+            512,
+            JSON_THROW_ON_ERROR
+        );
+
+        $this->assertSame(
+            1,
+            $preview['schemaVersion']
+        );
+
+        $this->assertSame(
+            'Connexion',
+            $preview['screen']
+        );
+
+        $this->assertSame(
+            'auth',
+            $preview['layout']
+        );
+
+        $this->assertSame(
+            ['title' => 'Connexion - Velt App'],
+            $preview['meta']
+        );
+
+        $this->assertCount(
+            2,
+            $preview['components']
+        );
+
+        $this->assertSame(
+            'Text',
+            $preview['components'][0]['type']
+        );
+
+        $this->assertSame(
+            'Connexion',
+            $preview['components'][0]['content']
+        );
+
+        $this->assertSame(
+            'Form',
+            $preview['components'][1]['type']
+        );
+
+        $this->assertSame(
+            'POST',
+            $preview['components'][1]['props']['method']
+        );
+
+        $this->assertSame(
+            '/login',
+            $preview['components'][1]['props']['action']
+        );
+
+        $this->assertTrue(
+            $preview['components'][1]['props']['csrf']
+        );
     }
 
-    private function writeView(string $relativePath, string $contents): void
+    public function test_custom_view_path_is_used(): void
     {
-        $path = $this->basePath . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $relativePath);
+        $customPath = $this->basePath
+            . DIRECTORY_SEPARATOR
+            . 'custom-views';
+
+        $this->writeView(
+            'custom-views/dashboard/home.velt.php',
+            <<<'PHP'
+<?php
+
+declare(strict_types=1);
+
+use Velt\Ui\Components\Text;
+use Velt\Ui\Page;
+
+return Page::make('Dashboard')
+    ->layout('dashboard')
+    ->add(
+        Text::make('Accueil')
+            ->as('h1')
+    );
+PHP
+        );
+
+        $app = new Application(
+            $this->basePath,
+            [
+                'view' => [
+                    'path' => $customPath,
+                ],
+            ]
+        );
+
+        $app->registerProvider(
+            UiServiceProvider::class
+        );
+
+        $viewFactory = $app
+            ->container()
+            ->get(ViewFactory::class);
+
+        $page = $viewFactory->make(
+            'dashboard.home'
+        );
+
+        $this->assertInstanceOf(
+            Page::class,
+            $page
+        );
+
+        $this->assertSame(
+            'Dashboard',
+            $page->title()
+        );
+
+        $this->assertSame(
+            'dashboard',
+            $page->getLayout()
+        );
+    }
+
+    private function writeView(
+        string $relativePath,
+        string $contents
+    ): void {
+        $path = $this->basePath
+            . DIRECTORY_SEPARATOR
+            . str_replace(
+                '/',
+                DIRECTORY_SEPARATOR,
+                $relativePath
+            );
+
         $directory = dirname($path);
 
         if (! is_dir($directory)) {
             mkdir($directory, 0777, true);
         }
 
-        file_put_contents($path, $contents);
+        file_put_contents(
+            $path,
+            $contents
+        );
     }
 
-    private function removeDirectory(string $path): void
-    {
+    private function removeDirectory(
+        string $path
+    ): void {
         if (! is_dir($path)) {
             return;
         }
 
         foreach (scandir($path) ?: [] as $entry) {
-            if ($entry === '.' || $entry === '..') {
+            if (
+                $entry === '.'
+                || $entry === '..'
+            ) {
                 continue;
             }
 
-            $child = $path . DIRECTORY_SEPARATOR . $entry;
+            $child = $path
+                . DIRECTORY_SEPARATOR
+                . $entry;
 
             if (is_dir($child)) {
                 $this->removeDirectory($child);
+
                 continue;
             }
 

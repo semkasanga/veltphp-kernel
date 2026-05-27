@@ -6,7 +6,7 @@
 
     "require": {
         "php": "^8.2",
-        "velt/ui": "*"
+        "velt/ui": "dev-main"
     },
 
     "repositories": [
