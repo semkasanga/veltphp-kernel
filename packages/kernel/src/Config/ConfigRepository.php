@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Velt\Kernel\Config;
 
 use Velt\Kernel\Contracts\ConfigRepositoryInterface;
+use Velt\Kernel\Contracts\EnvRepositoryInterface;
 
 final class ConfigRepository implements ConfigRepositoryInterface
 {
@@ -15,11 +16,10 @@ final class ConfigRepository implements ConfigRepositoryInterface
      */
     private array $items = [];
 
-    /**
-     * @param array<string, mixed> $items
-     */
-    public function __construct(array $items = [])
-    {
+    public function __construct(
+        array $items = [],
+        private readonly ?EnvRepositoryInterface $env = null
+    ) {
         $this->items = $items;
     }
 
@@ -30,8 +30,9 @@ final class ConfigRepository implements ConfigRepositoryInterface
         $value = $this->items;
 
         foreach ($segments as $segment) {
-            if (! is_array($value) || ! array_key_exists($segment, $value)) {
-                return $default;
+            if (!is_array($value) || !array_key_exists($segment, $value)) {
+                // fallback env si disponible (ex: APP_DEBUG)
+                return $this->env?->get($key, $default) ?? $default;
             }
 
             $value = $value[$segment];
@@ -47,7 +48,7 @@ final class ConfigRepository implements ConfigRepositoryInterface
         $current = &$this->items;
 
         foreach ($segments as $segment) {
-            if (! isset($current[$segment]) || ! is_array($current[$segment])) {
+            if (!isset($current[$segment]) || !is_array($current[$segment])) {
                 $current[$segment] = [];
             }
 
@@ -59,7 +60,19 @@ final class ConfigRepository implements ConfigRepositoryInterface
 
     public function has(string $key): bool
     {
-        return $this->get($key) !== null;
+        $segments = explode('.', $key);
+
+        $value = $this->items;
+
+        foreach ($segments as $segment) {
+            if (!is_array($value) || !array_key_exists($segment, $value)) {
+                return false;
+            }
+
+            $value = $value[$segment];
+        }
+
+        return true;
     }
 
     public function all(): array
