@@ -33,44 +33,39 @@ final class Application implements ApplicationInterface
     private ExceptionHandlerInterface $exceptions;
 
     /**
-     * Providers enregistrés.
-     *
      * @var array<int, ServiceProviderInterface>
      */
     private array $providers = [];
 
-    /**
-     * Indique si l'application a été bootée.
-     */
     private bool $booted = false;
 
-    /**
-     * @param array<string, mixed> $config
-     */
     public function __construct(
         string $basePath,
         array $config = []
     ) {
-        $this->basePath = rtrim(
-            $basePath,
-            DIRECTORY_SEPARATOR
-        );
+        $this->basePath = rtrim($basePath, DIRECTORY_SEPARATOR);
 
         $this->container = new Container();
-
-        $this->config = new ConfigRepository(
-            $config
-        );
-
-        $this->events = new EventDispatcher();
 
         $this->env = new EnvRepository();
 
         $this->loadEnvironment();
 
+        $this->config = new ConfigRepository(
+            $config,
+            $this->env
+        );
+
+        $this->events = new EventDispatcher();
+
         $this->exceptions = new DefaultExceptionHandler(
             $this->isDebug()
         );
+
+        // ne pas charger config en mode test
+        if (! $this->isTesting()) {
+            $this->loadConfigurationFiles();
+        }
 
         $this->registerBaseBindings();
     }
@@ -107,10 +102,7 @@ final class Application implements ApplicationInterface
 
     public function environment(): string
     {
-        return (string) $this->env->get(
-            'APP_ENV',
-            'production'
-        );
+        return (string) $this->env->get('APP_ENV', 'production');
     }
 
     public function isLocal(): bool
@@ -130,10 +122,7 @@ final class Application implements ApplicationInterface
 
     public function isDebug(): bool
     {
-        return (bool) $this->env->get(
-            'APP_DEBUG',
-            false
-        );
+        return (bool) $this->env->get('APP_DEBUG', false);
     }
 
     public function registerProvider(
@@ -146,7 +135,7 @@ final class Application implements ApplicationInterface
         }
 
         if (is_string($provider)) {
-            if (! class_exists($provider)) {
+            if (!class_exists($provider)) {
                 throw new InvalidArgumentException(
                     "Provider class [$provider] does not exist."
                 );
@@ -155,7 +144,7 @@ final class Application implements ApplicationInterface
             $provider = new $provider($this);
         }
 
-        if (! $provider instanceof ServiceProviderInterface) {
+        if (!$provider instanceof ServiceProviderInterface) {
             throw new InvalidArgumentException(
                 'Provider must implement ServiceProviderInterface.'
             );
@@ -165,10 +154,7 @@ final class Application implements ApplicationInterface
 
         $this->providers[] = $provider;
 
-        $this->events->dispatch(
-            'provider.registered',
-            $provider
-        );
+        $this->events->dispatch('provider.registered', $provider);
 
         return $provider;
     }
@@ -185,44 +171,58 @@ final class Application implements ApplicationInterface
 
         $this->booted = true;
 
-        $this->events->dispatch(
-            'application.booted'
-        );
+        $this->events->dispatch('application.booted');
     }
 
     private function registerBaseBindings(): void
     {
-        $this->container->instance(
-            'app',
-            $this
-        );
+        $this->container->instance('app', $this);
+        $this->container->instance('config', $this->config);
+        $this->container->instance('events', $this->events);
+        $this->container->instance('env', $this->env);
+        $this->container->instance('exceptions', $this->exceptions);
 
         $this->container->instance(
-            'config',
+            ConfigRepositoryInterface::class,
             $this->config
         );
+    }
 
-        $this->container->instance(
-            'events',
-            $this->events
-        );
+    /**
+     * Charge config/*.php proprement (merge namespace-based)
+     */
+    private function loadConfigurationFiles(): void
+    {
+        $configPath = $this->basePath . DIRECTORY_SEPARATOR . 'config';
 
-        $this->container->instance(
-            'env',
-            $this->env
-        );
+        if (!is_dir($configPath)) {
+            return;
+        }
 
-        $this->container->instance(
-            'exceptions',
-            $this->exceptions
-        );
+        foreach (glob($configPath . DIRECTORY_SEPARATOR . '*.php') ?: [] as $file) {
+
+            if (!is_file($file)) {
+                continue;
+            }
+
+            $key = basename($file, '.php');
+            $data = require $file;
+
+            if (!is_array($data)) {
+                continue;
+            }
+
+            foreach ($data as $k => $value) {
+                $this->config->set($key . '.' . $k, $value);
+            }
+        }
     }
 
     private function loadEnvironment(): void
     {
         $envPath = $this->basePath . DIRECTORY_SEPARATOR . '.env';
 
-        if (! file_exists($envPath)) {
+        if (!file_exists($envPath)) {
             return;
         }
 

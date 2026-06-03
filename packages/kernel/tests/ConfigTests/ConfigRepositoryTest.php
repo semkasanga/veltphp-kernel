@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Velt\Kernel\Tests\Config;
+namespace Velt\Kernel\Tests\ConfigTests;
 
 use PHPUnit\Framework\TestCase;
 use Velt\Kernel\Config\ConfigRepository;
