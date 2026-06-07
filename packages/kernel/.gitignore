@@ -23,3 +23,6 @@ Thumbs.db
 # Test artifacts
 build/
 phpunit.xml.cache
+
+# Documentation local
+docs/local/*
