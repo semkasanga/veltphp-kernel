@@ -5,9 +5,7 @@ declare(strict_types=1);
 namespace Velt\Kernel;
 
 use InvalidArgumentException;
-use Velt\Kernel\Env\EnvRepository;
 use Velt\Kernel\Config\ConfigRepository;
-use Velt\Kernel\Exceptions\DefaultExceptionHandler;
 use Velt\Kernel\Contracts\ApplicationInterface;
 use Velt\Kernel\Contracts\ConfigRepositoryInterface;
 use Velt\Kernel\Contracts\ContainerInterface;
@@ -15,12 +13,19 @@ use Velt\Kernel\Contracts\EnvRepositoryInterface;
 use Velt\Kernel\Contracts\EventDispatcherInterface;
 use Velt\Kernel\Contracts\ExceptionHandlerInterface;
 use Velt\Kernel\Contracts\ServiceProviderInterface;
+use Velt\Kernel\Env\EnvRepository;
+use Velt\Kernel\Exceptions\DefaultExceptionHandler;
 
 final class Application implements ApplicationInterface
 {
     public const VERSION = '0.1.0';
 
     private string $basePath;
+
+    public function version(): string
+    {
+        return self::VERSION;
+    }
 
     private ContainerInterface $container;
 
@@ -33,17 +38,24 @@ final class Application implements ApplicationInterface
     private ExceptionHandlerInterface $exceptions;
 
     /**
-     * @var array<int, ServiceProviderInterface>
+     * @var array<class-string, ServiceProviderInterface>
      */
     private array $providers = [];
 
     private bool $booted = false;
 
+    private bool $bootstrapped = false;
+
+    private bool $terminated = false;
+
     public function __construct(
         string $basePath,
         array $config = []
     ) {
-        $this->basePath = rtrim($basePath, DIRECTORY_SEPARATOR);
+        $this->basePath = rtrim(
+            $basePath,
+            DIRECTORY_SEPARATOR
+        );
 
         $this->container = new Container();
 
@@ -62,7 +74,6 @@ final class Application implements ApplicationInterface
             $this->isDebug()
         );
 
-        // ne pas charger config en mode test
         if (! $this->isTesting()) {
             $this->loadConfigurationFiles();
         }
@@ -102,7 +113,10 @@ final class Application implements ApplicationInterface
 
     public function environment(): string
     {
-        return (string) $this->env->get('APP_ENV', 'production');
+        return (string) $this->env->get(
+            'APP_ENV',
+            'production'
+        );
     }
 
     public function isLocal(): bool
@@ -122,7 +136,10 @@ final class Application implements ApplicationInterface
 
     public function isDebug(): bool
     {
-        return (bool) $this->env->get('APP_DEBUG', false);
+        return (bool) $this->env->get(
+            'APP_DEBUG',
+            false
+        );
     }
 
     public function registerProvider(
@@ -135,7 +152,7 @@ final class Application implements ApplicationInterface
         }
 
         if (is_string($provider)) {
-            if (!class_exists($provider)) {
+            if (! class_exists($provider)) {
                 throw new InvalidArgumentException(
                     "Provider class [$provider] does not exist."
                 );
@@ -144,19 +161,90 @@ final class Application implements ApplicationInterface
             $provider = new $provider($this);
         }
 
-        if (!$provider instanceof ServiceProviderInterface) {
+        if (! $provider instanceof ServiceProviderInterface) {
             throw new InvalidArgumentException(
                 'Provider must implement ServiceProviderInterface.'
             );
         }
 
+        if (
+            isset($this->providers[$provider::class])
+        ) {
+            return $this->providers[$provider::class];
+        }
+
         $provider->register();
 
-        $this->providers[] = $provider;
+        $this->providers[$provider::class] = $provider;
 
-        $this->events->dispatch('provider.registered', $provider);
+        $this->events->dispatch(
+            'provider.registered',
+            $provider
+        );
 
         return $provider;
+    }
+
+    public function hasProvider(
+        string $provider
+    ): bool {
+        return isset(
+            $this->providers[$provider]
+        );
+    }
+
+    public function getProvider(
+        string $provider
+    ): ?ServiceProviderInterface {
+        return $this->providers[$provider]
+            ?? null;
+    }
+
+    /**
+     * @return array<int, ServiceProviderInterface>
+     */
+    public function providers(): array
+    {
+        return array_values(
+            $this->providers
+        );
+    }
+
+    public function isBooted(): bool
+    {
+        return $this->booted;
+    }
+
+    public function isBootstrapped(): bool
+    {
+        return $this->bootstrapped;
+    }
+
+    public function isTerminated(): bool
+    {
+        return $this->terminated;
+    }
+
+    /**
+     * Prépare l'application avant exécution.
+     */
+    public function bootstrap(): void
+    {
+        if ($this->bootstrapped) {
+            return;
+        }
+
+        $this->events->dispatch(
+            'application.bootstrapping'
+        );
+
+        $this->boot();
+
+        $this->bootstrapped = true;
+
+        $this->events->dispatch(
+            'application.bootstrapped'
+        );
     }
 
     public function boot(): void
@@ -171,58 +259,173 @@ final class Application implements ApplicationInterface
 
         $this->booted = true;
 
-        $this->events->dispatch('application.booted');
+        $this->events->dispatch(
+            'application.booted'
+        );
+    }
+
+    /**
+     * Point d'entrée runtime.
+     */
+    public function handle(
+        mixed $input = null
+    ): mixed {
+        $this->bootstrap();
+
+        $this->events->dispatch(
+            'application.handling',
+            $input
+        );
+
+        $output = $input;
+
+        $this->events->dispatch(
+            'application.handled',
+            $output
+        );
+
+        return $output;
+    }
+
+    /**
+     * Termine proprement l'exécution.
+     */
+    public function terminate(
+        mixed $input = null,
+        mixed $output = null
+    ): void {
+        if ($this->terminated) {
+            return;
+        }
+
+        $this->events->dispatch(
+            'application.terminating',
+            [
+                'input' => $input,
+                'output' => $output,
+            ]
+        );
+
+        $this->terminated = true;
+
+        $this->events->dispatch(
+            'application.terminated',
+            [
+                'input' => $input,
+                'output' => $output,
+            ]
+        );
     }
 
     private function registerBaseBindings(): void
     {
-        $this->container->instance('app', $this);
-        $this->container->instance('config', $this->config);
-        $this->container->instance('events', $this->events);
-        $this->container->instance('env', $this->env);
-        $this->container->instance('exceptions', $this->exceptions);
+        $this->container->instance(
+            'app',
+            $this
+        );
+
+        $this->container->instance(
+            'config',
+            $this->config
+        );
+
+        $this->container->instance(
+            'events',
+            $this->events
+        );
+
+        $this->container->instance(
+            'env',
+            $this->env
+        );
+
+        $this->container->instance(
+            'exceptions',
+            $this->exceptions
+        );
+
+        $this->container->instance(
+            ApplicationInterface::class,
+            $this
+        );
+
+        $this->container->instance(
+            ContainerInterface::class,
+            $this->container
+        );
 
         $this->container->instance(
             ConfigRepositoryInterface::class,
             $this->config
         );
+
+        $this->container->instance(
+            EnvRepositoryInterface::class,
+            $this->env
+        );
+
+        $this->container->instance(
+            EventDispatcherInterface::class,
+            $this->events
+        );
+
+        $this->container->instance(
+            ExceptionHandlerInterface::class,
+            $this->exceptions
+        );
     }
 
     /**
-     * Charge config/*.php proprement (merge namespace-based)
+     * Charge config/*.php.
      */
     private function loadConfigurationFiles(): void
     {
-        $configPath = $this->basePath . DIRECTORY_SEPARATOR . 'config';
+        $configPath = $this->basePath
+            . DIRECTORY_SEPARATOR
+            . 'config';
 
-        if (!is_dir($configPath)) {
+        if (! is_dir($configPath)) {
             return;
         }
 
-        foreach (glob($configPath . DIRECTORY_SEPARATOR . '*.php') ?: [] as $file) {
-
-            if (!is_file($file)) {
+        foreach (
+            glob(
+                $configPath
+                    . DIRECTORY_SEPARATOR
+                    . '*.php'
+            ) ?: [] as $file
+        ) {
+            if (! is_file($file)) {
                 continue;
             }
 
-            $key = basename($file, '.php');
+            $key = basename(
+                $file,
+                '.php'
+            );
+
             $data = require $file;
 
-            if (!is_array($data)) {
+            if (! is_array($data)) {
                 continue;
             }
 
             foreach ($data as $k => $value) {
-                $this->config->set($key . '.' . $k, $value);
+                $this->config->set(
+                    $key . '.' . $k,
+                    $value
+                );
             }
         }
     }
 
     private function loadEnvironment(): void
     {
-        $envPath = $this->basePath . DIRECTORY_SEPARATOR . '.env';
+        $envPath = $this->basePath
+            . DIRECTORY_SEPARATOR
+            . '.env';
 
-        if (!file_exists($envPath)) {
+        if (! file_exists($envPath)) {
             return;
         }
 

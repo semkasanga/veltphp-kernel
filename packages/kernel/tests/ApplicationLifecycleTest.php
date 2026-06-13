@@ -88,4 +88,199 @@ final class ApplicationLifecycleTest extends TestCase
             FakeServiceProvider::class
         );
     }
+
+    public function test_has_provider_returns_true_when_registered(): void
+    {
+        $app = new Application(__DIR__);
+
+        $app->registerProvider(
+            FakeServiceProvider::class
+        );
+
+        $this->assertTrue(
+            $app->hasProvider(
+                FakeServiceProvider::class
+            )
+        );
+    }
+
+    public function test_has_provider_returns_false_when_not_registered(): void
+    {
+        $app = new Application(__DIR__);
+
+        $this->assertFalse(
+            $app->hasProvider(
+                FakeServiceProvider::class
+            )
+        );
+    }
+
+    public function test_get_provider_returns_registered_provider(): void
+    {
+        $app = new Application(__DIR__);
+
+        $provider = $app->registerProvider(
+            FakeServiceProvider::class
+        );
+
+        $this->assertSame(
+            $provider,
+            $app->getProvider(
+                FakeServiceProvider::class
+            )
+        );
+    }
+
+    public function test_get_provider_returns_null_when_missing(): void
+    {
+        $app = new Application(__DIR__);
+
+        $this->assertNull(
+            $app->getProvider(
+                FakeServiceProvider::class
+            )
+        );
+    }
+
+    public function test_providers_returns_all_registered_providers(): void
+    {
+        $app = new Application(__DIR__);
+
+        $provider = $app->registerProvider(
+            FakeServiceProvider::class
+        );
+
+        $providers = $app->providers();
+
+        $this->assertCount(
+            1,
+            $providers
+        );
+
+        $this->assertSame(
+            $provider,
+            $providers[0]
+        );
+    }
+
+    public function test_registering_same_provider_twice_keeps_single_instance(): void
+    {
+        $app = new Application(__DIR__);
+
+        $app->registerProvider(
+            FakeServiceProvider::class
+        );
+
+        $app->registerProvider(
+            FakeServiceProvider::class
+        );
+
+        $this->assertCount(
+            1,
+            $app->providers()
+        );
+    }
+
+    public function test_same_provider_is_registered_only_once(): void
+    {
+        $app = new Application(__DIR__);
+
+        $first = $app->registerProvider(
+            FakeServiceProvider::class
+        );
+
+        $second = $app->registerProvider(
+            FakeServiceProvider::class
+        );
+
+        $this->assertSame(
+            $first,
+            $second
+        );
+
+        $this->assertCount(
+            1,
+            $app->providers()
+        );
+    }
+
+    public function test_application_lifecycle_flags_change(): void
+    {
+        $app = new Application(__DIR__);
+
+        $this->assertFalse(
+            $app->isBooted()
+        );
+
+        $this->assertFalse(
+            $app->isBootstrapped()
+        );
+
+        $this->assertFalse(
+            $app->isTerminated()
+        );
+
+        $app->bootstrap();
+
+        $this->assertTrue(
+            $app->isBooted()
+        );
+
+        $this->assertTrue(
+            $app->isBootstrapped()
+        );
+
+        $app->terminate();
+
+        $this->assertTrue(
+            $app->isTerminated()
+        );
+    }
+
+    public function test_application_lifecycle_states(): void
+    {
+        $app = new Application(__DIR__);
+
+        $this->assertFalse(
+            $app->isBooted()
+        );
+
+        $this->assertFalse(
+            $app->isBootstrapped()
+        );
+
+        $this->assertFalse(
+            $app->isTerminated()
+        );
+
+        $app->bootstrap();
+
+        $this->assertTrue(
+            $app->isBooted()
+        );
+
+        $this->assertTrue(
+            $app->isBootstrapped()
+        );
+
+        $this->assertFalse(
+            $app->isTerminated()
+        );
+
+        $app->terminate();
+
+        $this->assertTrue(
+            $app->isTerminated()
+        );
+    }
+
+    public function test_application_exposes_version(): void
+    {
+        $app = new Application(__DIR__);
+
+        $this->assertSame(
+            Application::VERSION,
+            $app->version()
+        );
+    }
 }

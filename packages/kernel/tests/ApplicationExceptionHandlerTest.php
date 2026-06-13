@@ -8,6 +8,7 @@ use PHPUnit\Framework\TestCase;
 use RuntimeException;
 use Velt\Kernel\Application;
 use Velt\Kernel\Contracts\ExceptionHandlerInterface;
+use Velt\Kernel\Tests\Fixtures\FakeExceptionHandler;
 
 final class ApplicationExceptionHandlerTest extends TestCase
 {
@@ -96,5 +97,49 @@ final class ApplicationExceptionHandlerTest extends TestCase
         unlink($basePath . '/.env');
 
         rmdir($basePath);
+    }
+
+    public function test_fake_exception_handler_reports_exception(): void
+    {
+        $handler = new FakeExceptionHandler();
+
+        $exception = new RuntimeException(
+            'Test exception'
+        );
+
+        $handler->report(
+            $exception
+        );
+
+        $this->assertTrue(
+            $handler->reported
+        );
+
+        $this->assertSame(
+            $exception,
+            $handler->exception
+        );
+    }
+
+    public function test_fake_exception_handler_renders_exception_message(): void
+    {
+        $handler = new FakeExceptionHandler();
+
+        $exception = new RuntimeException(
+            'Render test'
+        );
+
+        $result = $handler->render(
+            $exception
+        );
+
+        $this->assertFalse(
+            $result['success']
+        );
+
+        $this->assertSame(
+            'Render test',
+            $result['message']
+        );
     }
 }

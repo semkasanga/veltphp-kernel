@@ -9,9 +9,15 @@ use Velt\Kernel\Contracts\ExceptionHandlerInterface;
 
 final class FakeExceptionHandler implements ExceptionHandlerInterface
 {
+    public bool $reported = false;
+
+    public ?Throwable $exception = null;
+
     public function report(Throwable $exception): void
     {
-        //
+        $this->reported = true;
+
+        $this->exception = $exception;
     }
 
     public function render(
