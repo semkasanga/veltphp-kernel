@@ -12,6 +12,8 @@ use Velt\Kernel\Contracts\ConfigRepositoryInterface;
 use Velt\Kernel\Contracts\ContainerInterface;
 use Velt\Kernel\Contracts\EnvRepositoryInterface;
 use Velt\Kernel\Contracts\EventDispatcherInterface;
+use Velt\Kernel\Contracts\ApplicationInterface;
+use Velt\Kernel\Contracts\ExceptionHandlerInterface;
 
 final class ApplicationTest extends TestCase
 {
@@ -223,6 +225,43 @@ final class ApplicationTest extends TestCase
         $this->assertInstanceOf(
             EnvRepositoryInterface::class,
             $container->get('env')
+        );
+    }
+
+    public function test_application_registers_contract_bindings(): void
+    {
+        $app = new Application(__DIR__);
+
+        $container = $app->container();
+
+        $this->assertSame(
+            $app,
+            $container->get(ApplicationInterface::class)
+        );
+
+        $this->assertSame(
+            $container,
+            $container->get(ContainerInterface::class)
+        );
+
+        $this->assertSame(
+            $app->config(),
+            $container->get(ConfigRepositoryInterface::class)
+        );
+
+        $this->assertSame(
+            $app->env(),
+            $container->get(EnvRepositoryInterface::class)
+        );
+
+        $this->assertSame(
+            $app->events(),
+            $container->get(EventDispatcherInterface::class)
+        );
+
+        $this->assertSame(
+            $app->exceptions(),
+            $container->get(ExceptionHandlerInterface::class)
         );
     }
 }

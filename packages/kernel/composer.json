@@ -5,8 +5,7 @@
     "license": "MIT",
 
     "require": {
-        "php": "^8.2",
-        "velt/ui": "dev-main"
+        "php": "^8.2"
     },
 
     "repositories": [

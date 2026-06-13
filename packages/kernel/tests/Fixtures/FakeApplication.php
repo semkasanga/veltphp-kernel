@@ -14,18 +14,27 @@ use Velt\Kernel\Contracts\ServiceProviderInterface;
 
 final class FakeApplication implements ApplicationInterface
 {
+    /**
+     * @var array<class-string, ServiceProviderInterface>
+     */
+    private array $providers = [];
+
     public function __construct(
         private readonly ContainerInterface $container,
         private readonly ConfigRepositoryInterface $config,
         private readonly EventDispatcherInterface $events,
         private readonly EnvRepositoryInterface $env,
         private readonly ExceptionHandlerInterface $exceptions,
-    ) {
-    }
+    ) {}
 
     public function basePath(): string
     {
         return '/velt';
+    }
+
+    public function version(): string
+    {
+        return 'test';
     }
 
     public function container(): ContainerInterface
@@ -81,14 +90,67 @@ final class FakeApplication implements ApplicationInterface
     public function registerProvider(
         string|ServiceProviderInterface $provider
     ): ServiceProviderInterface {
-        if ($provider instanceof ServiceProviderInterface) {
-            return $provider;
+        if (is_string($provider)) {
+            $provider = new $provider($this);
         }
 
-        return new $provider($this);
+        $this->providers[$provider::class] = $provider;
+
+        return $provider;
     }
 
-    public function boot(): void
+    public function hasProvider(
+        string $provider
+    ): bool {
+        return isset(
+            $this->providers[$provider]
+        );
+    }
+
+    public function getProvider(
+        string $provider
+    ): ?ServiceProviderInterface {
+        return $this->providers[$provider]
+            ?? null;
+    }
+
+    /**
+     * @return array<int, ServiceProviderInterface>
+     */
+    public function providers(): array
     {
+        return array_values(
+            $this->providers
+        );
+    }
+
+    public function bootstrap(): void {}
+
+    public function boot(): void {}
+
+    public function handle(
+        mixed $input = null
+    ): mixed {
+        return $input;
+    }
+
+    public function terminate(
+        mixed $input = null,
+        mixed $output = null
+    ): void {}
+
+    public function isBooted(): bool
+    {
+        return false;
+    }
+
+    public function isBootstrapped(): bool
+    {
+        return false;
+    }
+
+    public function isTerminated(): bool
+    {
+        return false;
     }
 }
