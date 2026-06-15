@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Velt\Kernel\Tests\ConfigTests;
 
 use PHPUnit\Framework\TestCase;
+use RuntimeException;
 use Velt\Kernel\Application;
 use Velt\Kernel\Contracts\ConfigRepositoryInterface;
 
@@ -17,6 +18,11 @@ final class ConfigRepositoryIntegrationTest extends TestCase
         $this->basePath = sys_get_temp_dir() . '/velt-kernel-config-' . uniqid('', true);
 
         mkdir($this->basePath . '/config', 0777, true);
+
+        file_put_contents(
+            $this->basePath . '/.env',
+            "APP_ENV=testing\nAPP_DEBUG=false"
+        );
 
         /**
          * config/app.php
@@ -58,6 +64,56 @@ final class ConfigRepositoryIntegrationTest extends TestCase
             $app->container()->get('config'),
             $app->container()->get(ConfigRepositoryInterface::class)
         );
+    }
+
+    public function test_runtime_configuration_overrides_file_configuration_without_losing_other_values(): void
+    {
+        $app = new Application(
+            $this->basePath,
+            [
+                'app' => [
+                    'name' => 'RuntimeVelt',
+                ],
+            ]
+        );
+
+        $config = $app->config();
+
+        $this->assertSame(
+            'RuntimeVelt',
+            $config->get('app.name')
+        );
+
+        $this->assertTrue(
+            $config->get('app.debug')
+        );
+    }
+
+    public function test_invalid_configuration_file_throws_exception(): void
+    {
+        $basePath = sys_get_temp_dir() . '/velt-kernel-invalid-config-' . uniqid('', true);
+
+        mkdir($basePath . '/config', 0777, true);
+
+        file_put_contents(
+            $basePath . '/.env',
+            'APP_ENV=production'
+        );
+
+        file_put_contents(
+            $basePath . '/config/app.php',
+            '<?php return "invalid";'
+        );
+
+        $this->expectException(
+            RuntimeException::class
+        );
+
+        try {
+            new Application($basePath);
+        } finally {
+            $this->deleteDir($basePath);
+        }
     }
 
     private function deleteDir(string $path): void

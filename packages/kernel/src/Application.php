@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Velt\Kernel;
 
 use InvalidArgumentException;
+use RuntimeException;
+use Throwable;
 use Velt\Kernel\Config\ConfigRepository;
 use Velt\Kernel\Contracts\ApplicationInterface;
 use Velt\Kernel\Contracts\ConfigRepositoryInterface;
@@ -48,6 +50,9 @@ final class Application implements ApplicationInterface
 
     private bool $terminated = false;
 
+    /**
+     * @param array<string, mixed> $config
+     */
     public function __construct(
         string $basePath,
         array $config = []
@@ -63,8 +68,13 @@ final class Application implements ApplicationInterface
 
         $this->loadEnvironment();
 
+        $configuration = $this->loadConfigurationFiles();
+
         $this->config = new ConfigRepository(
-            $config,
+            $this->mergeConfiguration(
+                $configuration,
+                $config
+            ),
             $this->env
         );
 
@@ -73,10 +83,6 @@ final class Application implements ApplicationInterface
         $this->exceptions = new DefaultExceptionHandler(
             $this->isDebug()
         );
-
-        if (! $this->isTesting()) {
-            $this->loadConfigurationFiles();
-        }
 
         $this->registerBaseBindings();
     }
@@ -152,24 +158,30 @@ final class Application implements ApplicationInterface
         }
 
         if (is_string($provider)) {
+            if (isset($this->providers[$provider])) {
+                return $this->providers[$provider];
+            }
+
             if (! class_exists($provider)) {
                 throw new InvalidArgumentException(
                     "Provider class [$provider] does not exist."
                 );
             }
 
-            $provider = new $provider($this);
-        }
-
-        if (! $provider instanceof ServiceProviderInterface) {
-            throw new InvalidArgumentException(
-                'Provider must implement ServiceProviderInterface.'
+            $instance = $this->instantiateProvider(
+                $provider
             );
+
+            if (! $instance instanceof ServiceProviderInterface) {
+                throw new InvalidArgumentException(
+                    "Provider class [$provider] must implement ServiceProviderInterface."
+                );
+            }
+
+            $provider = $instance;
         }
 
-        if (
-            isset($this->providers[$provider::class])
-        ) {
+        if (isset($this->providers[$provider::class])) {
             return $this->providers[$provider::class];
         }
 
@@ -226,7 +238,7 @@ final class Application implements ApplicationInterface
     }
 
     /**
-     * Prépare l'application avant exécution.
+     * Prepare l'application avant execution.
      */
     public function bootstrap(): void
     {
@@ -265,7 +277,7 @@ final class Application implements ApplicationInterface
     }
 
     /**
-     * Point d'entrée runtime.
+     * Point d'entree runtime.
      */
     public function handle(
         mixed $input = null
@@ -288,7 +300,7 @@ final class Application implements ApplicationInterface
     }
 
     /**
-     * Termine proprement l'exécution.
+     * Termine proprement l'execution.
      */
     public function terminate(
         mixed $input = null,
@@ -377,24 +389,30 @@ final class Application implements ApplicationInterface
 
     /**
      * Charge config/*.php.
+     *
+     * @return array<string, mixed>
      */
-    private function loadConfigurationFiles(): void
+    private function loadConfigurationFiles(): array
     {
         $configPath = $this->basePath
             . DIRECTORY_SEPARATOR
             . 'config';
 
         if (! is_dir($configPath)) {
-            return;
+            return [];
         }
 
-        foreach (
-            glob(
-                $configPath
-                    . DIRECTORY_SEPARATOR
-                    . '*.php'
-            ) ?: [] as $file
-        ) {
+        $configuration = [];
+
+        $files = glob(
+            $configPath
+            . DIRECTORY_SEPARATOR
+            . '*.php'
+        ) ?: [];
+
+        sort($files, SORT_NATURAL);
+
+        foreach ($files as $file) {
             if (! is_file($file)) {
                 continue;
             }
@@ -407,16 +425,75 @@ final class Application implements ApplicationInterface
             $data = require $file;
 
             if (! is_array($data)) {
+                throw new RuntimeException(
+                    sprintf(
+                        'Configuration file [%s] must return an array.',
+                        $file
+                    )
+                );
+            }
+
+            $configuration[$key] = $this->mergeConfiguration(
+                $configuration[$key] ?? [],
+                $data
+            );
+        }
+
+        return $configuration;
+    }
+
+    /**
+     * @param array<int|string, mixed> $base
+     * @param array<int|string, mixed> $overrides
+     *
+     * @return array<int|string, mixed>
+     */
+    private function mergeConfiguration(
+        array $base,
+        array $overrides
+    ): array {
+        foreach ($overrides as $key => $value) {
+            if (
+                array_key_exists($key, $base) &&
+                is_array($base[$key]) &&
+                is_array($value) &&
+                $this->canMergeConfigurationArrays(
+                    $base[$key],
+                    $value
+                )
+            ) {
+                $base[$key] = $this->mergeConfiguration(
+                    $base[$key],
+                    $value
+                );
+
                 continue;
             }
 
-            foreach ($data as $k => $value) {
-                $this->config->set(
-                    $key . '.' . $k,
-                    $value
-                );
-            }
+            $base[$key] = $value;
         }
+
+        return $base;
+    }
+
+    /**
+     * @param array<int|string, mixed> $left
+     * @param array<int|string, mixed> $right
+     */
+    private function canMergeConfigurationArrays(
+        array $left,
+        array $right
+    ): bool {
+        return (
+            (
+                $left === [] ||
+                ! array_is_list($left)
+            ) &&
+            (
+                $right === [] ||
+                ! array_is_list($right)
+            )
+        );
     }
 
     private function loadEnvironment(): void
@@ -430,5 +507,19 @@ final class Application implements ApplicationInterface
         }
 
         $this->env->load($envPath);
+    }
+
+    private function instantiateProvider(
+        string $provider
+    ): object {
+        try {
+            return new $provider($this);
+        } catch (Throwable $exception) {
+            throw new InvalidArgumentException(
+                "Provider class [$provider] could not be instantiated.",
+                0,
+                $exception
+            );
+        }
     }
 }

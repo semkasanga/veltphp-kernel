@@ -30,6 +30,83 @@ final class ApplicationEventsTest extends TestCase
         $this->assertTrue($called);
     }
 
+    public function test_it_dispatches_application_bootstrap_events_in_order(): void
+    {
+        $app = new Application(__DIR__);
+
+        $events = [];
+
+        $app->events()->listen(
+            'application.bootstrapping',
+            function (mixed $payload, object|string $event) use (&$events): void {
+                $events[] = $event;
+            }
+        );
+
+        $app->events()->listen(
+            'application.booted',
+            function (mixed $payload, object|string $event) use (&$events): void {
+                $events[] = $event;
+            }
+        );
+
+        $app->events()->listen(
+            'application.bootstrapped',
+            function (mixed $payload, object|string $event) use (&$events): void {
+                $events[] = $event;
+            }
+        );
+
+        $app->bootstrap();
+
+        $this->assertSame(
+            [
+                'application.bootstrapping',
+                'application.booted',
+                'application.bootstrapped',
+            ],
+            $events
+        );
+    }
+
+    public function test_it_dispatches_application_handle_events_in_order(): void
+    {
+        $app = new Application(__DIR__);
+
+        $app->bootstrap();
+
+        $events = [];
+
+        $app->events()->listen(
+            'application.handling',
+            function (mixed $payload, object|string $event) use (&$events): void {
+                $events[] = $event;
+            }
+        );
+
+        $app->events()->listen(
+            'application.handled',
+            function (mixed $payload, object|string $event) use (&$events): void {
+                $events[] = $event;
+            }
+        );
+
+        $result = $app->handle('payload');
+
+        $this->assertSame(
+            'payload',
+            $result
+        );
+
+        $this->assertSame(
+            [
+                'application.handling',
+                'application.handled',
+            ],
+            $events
+        );
+    }
+
     public function test_it_dispatches_application_booted_event(): void
     {
         $app = new Application(__DIR__);
@@ -46,5 +123,38 @@ final class ApplicationEventsTest extends TestCase
         $app->boot();
 
         $this->assertTrue($called);
+    }
+
+    public function test_it_dispatches_application_terminate_events_in_order(): void
+    {
+        $app = new Application(__DIR__);
+
+        $app->bootstrap();
+
+        $events = [];
+
+        $app->events()->listen(
+            'application.terminating',
+            function (mixed $payload, object|string $event) use (&$events): void {
+                $events[] = $event;
+            }
+        );
+
+        $app->events()->listen(
+            'application.terminated',
+            function (mixed $payload, object|string $event) use (&$events): void {
+                $events[] = $event;
+            }
+        );
+
+        $app->terminate('input', 'output');
+
+        $this->assertSame(
+            [
+                'application.terminating',
+                'application.terminated',
+            ],
+            $events
+        );
     }
 }

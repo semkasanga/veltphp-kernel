@@ -12,8 +12,7 @@ implements ExceptionHandlerInterface
 {
     public function __construct(
         private readonly bool $debug = false
-    ) {
-    }
+    ) {}
 
     public function report(
         Throwable $exception
@@ -51,5 +50,17 @@ implements ExceptionHandlerInterface
             'success' => false,
             'message' => 'An internal error occurred.',
         ];
+    }
+
+    public function handle(
+        Throwable $exception,
+        mixed $context = null
+    ): array {
+        $this->report($exception);
+
+        return $this->render(
+            $exception,
+            $context
+        );
     }
 }

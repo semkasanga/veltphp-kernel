@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Velt\Kernel\Contracts;
 
-interface ApplicationInterface
+interface ApplicationInterface extends RuntimeInterface
 {
     /**
      * Retourne le chemin racine de l'application.

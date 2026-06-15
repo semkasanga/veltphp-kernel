@@ -16,6 +16,9 @@ final class ConfigRepository implements ConfigRepositoryInterface
      */
     private array $items = [];
 
+    /**
+     * @param array<string, mixed> $items
+     */
     public function __construct(
         array $items = [],
         private readonly ?EnvRepositoryInterface $env = null
@@ -30,9 +33,11 @@ final class ConfigRepository implements ConfigRepositoryInterface
         $value = $this->items;
 
         foreach ($segments as $segment) {
-            if (!is_array($value) || !array_key_exists($segment, $value)) {
-                // fallback env si disponible (ex: APP_DEBUG)
-                return $this->env?->get($key, $default) ?? $default;
+            if (! is_array($value) || ! array_key_exists($segment, $value)) {
+                return $this->resolveEnvironmentValue(
+                    $key,
+                    $default
+                );
             }
 
             $value = $value[$segment];
@@ -48,7 +53,7 @@ final class ConfigRepository implements ConfigRepositoryInterface
         $current = &$this->items;
 
         foreach ($segments as $segment) {
-            if (!isset($current[$segment]) || !is_array($current[$segment])) {
+            if (! isset($current[$segment]) || ! is_array($current[$segment])) {
                 $current[$segment] = [];
             }
 
@@ -65,8 +70,8 @@ final class ConfigRepository implements ConfigRepositoryInterface
         $value = $this->items;
 
         foreach ($segments as $segment) {
-            if (!is_array($value) || !array_key_exists($segment, $value)) {
-                return false;
+            if (! is_array($value) || ! array_key_exists($segment, $value)) {
+                return $this->hasEnvironmentValue($key);
             }
 
             $value = $value[$segment];
@@ -78,5 +83,56 @@ final class ConfigRepository implements ConfigRepositoryInterface
     public function all(): array
     {
         return $this->items;
+    }
+
+    private function resolveEnvironmentValue(
+        string $key,
+        mixed $default = null
+    ): mixed {
+        if ($this->env === null) {
+            return $default;
+        }
+
+        $envKey = $this->normalizeEnvironmentKey($key);
+
+        if (! $this->env->has($envKey)) {
+            return $default;
+        }
+
+        return $this->env->get(
+            $envKey,
+            $default
+        );
+    }
+
+    private function hasEnvironmentValue(string $key): bool
+    {
+        if ($this->env === null) {
+            return false;
+        }
+
+        return $this->env->has(
+            $this->normalizeEnvironmentKey($key)
+        );
+    }
+
+    private function normalizeEnvironmentKey(string $key): string
+    {
+        $normalized = preg_replace(
+            '/[^A-Za-z0-9]+/',
+            '_',
+            $key
+        );
+
+        if ($normalized === null) {
+            $normalized = $key;
+        }
+
+        return strtoupper(
+            trim(
+                $normalized,
+                '_'
+            )
+        );
     }
 }

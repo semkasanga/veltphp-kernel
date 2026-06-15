@@ -71,4 +71,23 @@ final class ContainerTest extends TestCase
 
         $container->get('unknown');
     }
+
+    public function test_bind_can_reference_another_registered_service_id(): void
+    {
+        $container = new Container();
+
+        $service = new \stdClass();
+
+        $container->instance('service', $service);
+        $container->bind('service.alias', 'service');
+
+        $this->assertTrue(
+            $container->has('service.alias')
+        );
+
+        $this->assertSame(
+            $service,
+            $container->get('service.alias')
+        );
+    }
 }

@@ -25,4 +25,17 @@ interface ExceptionHandlerInterface
         Throwable $exception,
         mixed $context = null
     ): array;
+
+    /**
+     * Gère complètement une exception.
+     *
+     * Effectue le report puis retourne
+     * la représentation exploitable.
+     *
+     * @return array<string,mixed>
+     */
+    public function handle(
+        Throwable $exception,
+        mixed $context = null
+    ): array;
 }

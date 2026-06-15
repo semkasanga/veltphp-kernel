@@ -29,4 +29,16 @@ final class FakeExceptionHandler implements ExceptionHandlerInterface
             'message' => $exception->getMessage(),
         ];
     }
+
+    public function handle(
+        Throwable $exception,
+        mixed $context = null
+    ): array {
+        $this->report($exception);
+
+        return $this->render(
+            $exception,
+            $context
+        );
+    }
 }

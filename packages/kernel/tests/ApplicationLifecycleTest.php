@@ -8,12 +8,15 @@ use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 use Velt\Kernel\Application;
 use Velt\Kernel\Tests\Fixtures\FakeServiceProvider;
+use Velt\Kernel\ServiceProvider;
+use Velt\Kernel\Contracts\ApplicationInterface;
 
 final class ApplicationLifecycleTest extends TestCase
 {
     protected function setUp(): void
     {
         FakeServiceProvider::$events = [];
+        ProviderLifecycleLog::reset();
     }
 
     public function test_provider_registers_service(): void
@@ -72,6 +75,45 @@ final class ApplicationLifecycleTest extends TestCase
         );
 
         $app->registerProvider('InvalidProvider');
+    }
+
+    public function test_provider_without_contract_is_rejected(): void
+    {
+        $app = new Application(__DIR__);
+
+        $this->expectException(
+            InvalidArgumentException::class
+        );
+
+        $app->registerProvider(
+            NotAServiceProvider::class
+        );
+    }
+
+    public function test_abstract_provider_is_rejected(): void
+    {
+        $app = new Application(__DIR__);
+
+        $this->expectException(
+            InvalidArgumentException::class
+        );
+
+        $app->registerProvider(
+            AbstractLifecycleProvider::class
+        );
+    }
+
+    public function test_provider_with_incompatible_constructor_is_rejected(): void
+    {
+        $app = new Application(__DIR__);
+
+        $this->expectException(
+            InvalidArgumentException::class
+        );
+
+        $app->registerProvider(
+            BrokenConstructorProvider::class
+        );
     }
 
     public function test_cannot_register_provider_after_boot(): void
@@ -282,5 +324,135 @@ final class ApplicationLifecycleTest extends TestCase
             Application::VERSION,
             $app->version()
         );
+    }
+
+    public function test_providers_are_returned_and_booted_in_registration_order(): void
+    {
+        $app = new Application(__DIR__);
+
+        $app->registerProvider(
+            OrderedFirstServiceProvider::class
+        );
+
+        $app->registerProvider(
+            OrderedSecondServiceProvider::class
+        );
+
+        $this->assertSame(
+            [
+                OrderedFirstServiceProvider::class,
+                OrderedSecondServiceProvider::class,
+            ],
+            array_map(
+                static fn ($provider): string => get_class($provider),
+                $app->providers()
+            )
+        );
+
+        $app->boot();
+
+        $this->assertSame(
+            [
+                'first.register',
+                'second.register',
+                'first.boot',
+                'second.boot',
+            ],
+            ProviderLifecycleLog::$events
+        );
+    }
+
+    public function test_terminate_is_idempotent(): void
+    {
+        $app = new Application(__DIR__);
+
+        $terminatedEvents = 0;
+
+        $app->events()->listen(
+            'application.terminated',
+            static function () use (&$terminatedEvents): void {
+                $terminatedEvents++;
+            }
+        );
+
+        $app->terminate(
+            'input',
+            'output'
+        );
+
+        $app->terminate(
+            'input',
+            'output'
+        );
+
+        $this->assertSame(
+            1,
+            $terminatedEvents
+        );
+
+        $this->assertTrue(
+            $app->isTerminated()
+        );
+    }
+}
+
+final class ProviderLifecycleLog
+{
+    /**
+     * @var array<int, string>
+     */
+    public static array $events = [];
+
+    public static function reset(): void
+    {
+        self::$events = [];
+    }
+}
+
+final class OrderedFirstServiceProvider extends ServiceProvider
+{
+    public function register(): void
+    {
+        ProviderLifecycleLog::$events[] = 'first.register';
+    }
+
+    public function boot(): void
+    {
+        ProviderLifecycleLog::$events[] = 'first.boot';
+    }
+}
+
+final class OrderedSecondServiceProvider extends ServiceProvider
+{
+    public function register(): void
+    {
+        ProviderLifecycleLog::$events[] = 'second.register';
+    }
+
+    public function boot(): void
+    {
+        ProviderLifecycleLog::$events[] = 'second.boot';
+    }
+}
+
+abstract class AbstractLifecycleProvider extends ServiceProvider
+{
+}
+
+final class BrokenConstructorProvider extends ServiceProvider
+{
+    public function __construct(
+        ApplicationInterface $app,
+        string $name
+    ) {
+        parent::__construct($app);
+    }
+}
+
+final class NotAServiceProvider
+{
+    public function __construct(
+        ApplicationInterface $app
+    ) {
     }
 }
