@@ -118,7 +118,7 @@ return \PHPStan\Cache\CacheItem::__set_state(array(
     ),
     1 => 
     array (
-      'C:\\Users\\Sem\\Desktop\\travail\\Projets personnels\\Velt\\veltphp-kernel\\packages\\kernel\\src\\Contracts\\PlatformInterface.php' => 'ab8dd0ccc68bb2c9f7299c813b8e33f7e20a46861f82c52f3041ef388b955afe',
+      'C:\\Users\\Sem\\Desktop\\travail\\Projets personnels\\Velt\\veltphp-kernel\\packages\\kernel\\src\\Contracts\\PlatformInterface.php' => 'cc781fcf53f407cb93b1f51393274efad911ae2f40c3e06e64cf216f5f2f8a51',
     ),
   ),
 ));

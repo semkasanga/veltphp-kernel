@@ -32,7 +32,7 @@ return \PHPStan\Cache\CacheItem::__set_state(array(
     ),
     1 => 
     array (
-      'C:\\Users\\Sem\\Desktop\\travail\\Projets personnels\\Velt\\veltphp-kernel\\packages\\kernel\\src\\Contracts\\DesktopPlatformInterface.php' => 'd2b1b2b52c1cf29c3eb0a2504078d5c3ada584dc4b53f9e4ca76fe4e3c036e5c',
+      'C:\\Users\\Sem\\Desktop\\travail\\Projets personnels\\Velt\\veltphp-kernel\\packages\\kernel\\src\\Contracts\\DesktopPlatformInterface.php' => '3ccb26d1ec5902a8dc947dad9ab458c5be805d03d1c4efe6df32bfb6417bca73',
     ),
   ),
 ));

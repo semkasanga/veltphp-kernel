@@ -333,7 +333,7 @@ return \PHPStan\Cache\CacheItem::__set_state(array(
     ),
     1 => 
     array (
-      'C:\\Users\\Sem\\Desktop\\travail\\Projets personnels\\Velt\\veltphp-kernel\\packages\\kernel\\src\\Contracts\\RuntimeInterface.php' => '0ad487e11174fa002a90815be1b8b56d1d0f1ed578eccb500df9cf24df13c871',
+      'C:\\Users\\Sem\\Desktop\\travail\\Projets personnels\\Velt\\veltphp-kernel\\packages\\kernel\\src\\Contracts\\RuntimeInterface.php' => '836054a0eb21cb628cc980e89f165578452142125a1123a93bdf03487380b1aa',
     ),
   ),
 ));
