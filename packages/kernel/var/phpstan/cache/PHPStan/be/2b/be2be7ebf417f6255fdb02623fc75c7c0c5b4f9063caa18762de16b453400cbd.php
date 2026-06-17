@@ -2,7 +2,7 @@
 
 // odsl-C:\Users\Sem\Desktop\travail\Projets personnels\Velt\veltphp-kernel\packages\kernel\src\Contracts\CliRuntimeInterface.php-PHPStan\BetterReflection\Reflection\ReflectionClass-Velt\Kernel\Contracts\CliRuntimeInterface
 return \PHPStan\Cache\CacheItem::__set_state(array(
-   'variableKey' => 'v2-6.70.0.1-8.3-2265f540c4a71f5867a0cc44eef788a7288d2a65efe06d37785a262b05e0ec37',
+   'variableKey' => 'v2-6.70.0.1-8.3-45ab6ed235e0948cf389b4f9dccb402b25f2d843c59a06eca98c41520fbda544',
    'data' => 
   array (
     'locatedSource' => 

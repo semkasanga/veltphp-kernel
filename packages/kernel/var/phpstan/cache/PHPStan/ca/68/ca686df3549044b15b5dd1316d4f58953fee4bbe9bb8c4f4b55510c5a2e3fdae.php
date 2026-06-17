@@ -2,7 +2,7 @@
 
 // odsl-C:\Users\Sem\Desktop\travail\Projets personnels\Velt\veltphp-kernel\packages\kernel\src\Contracts\DatabaseManagerInterface.php-PHPStan\BetterReflection\Reflection\ReflectionClass-Velt\Kernel\Contracts\DatabaseManagerInterface
 return \PHPStan\Cache\CacheItem::__set_state(array(
-   'variableKey' => 'v2-6.70.0.1-8.3-1a04983c3a3086e2339ba0404a69518602333960a0e051a3a1ad9dde59ae9278',
+   'variableKey' => 'v2-6.70.0.1-8.3-80720f3a41872f4d01a40a46d11ebf659e07b04bad6a618912071ad857e6af6c',
    'data' => 
   array (
     'locatedSource' => 
@@ -63,9 +63,9 @@ return \PHPStan\Cache\CacheItem::__set_state(array(
                 'startLine' => 16,
                 'endLine' => 16,
                 'startTokenPos' => 39,
-                'startFilePos' => 293,
+                'startFilePos' => 308,
                 'endTokenPos' => 39,
-                'endFilePos' => 296,
+                'endFilePos' => 311,
               ),
             ),
             'type' => 
@@ -157,9 +157,9 @@ return \PHPStan\Cache\CacheItem::__set_state(array(
                 'startLine' => 23,
                 'endLine' => 23,
                 'startTokenPos' => 63,
-                'startFilePos' => 445,
+                'startFilePos' => 467,
                 'endTokenPos' => 63,
-                'endFilePos' => 448,
+                'endFilePos' => 470,
               ),
             ),
             'type' => 

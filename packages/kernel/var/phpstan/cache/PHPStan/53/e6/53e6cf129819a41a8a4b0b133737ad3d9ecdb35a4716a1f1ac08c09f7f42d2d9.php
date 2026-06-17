@@ -2,7 +2,7 @@
 
 // odsl-C:\Users\Sem\Desktop\travail\Projets personnels\Velt\veltphp-kernel\packages\kernel\src\Contracts\RuntimeInterface.php-PHPStan\BetterReflection\Reflection\ReflectionClass-Velt\Kernel\Contracts\RuntimeInterface
 return \PHPStan\Cache\CacheItem::__set_state(array(
-   'variableKey' => 'v2-6.70.0.1-8.3-0ad487e11174fa002a90815be1b8b56d1d0f1ed578eccb500df9cf24df13c871',
+   'variableKey' => 'v2-6.70.0.1-8.3-836054a0eb21cb628cc980e89f165578452142125a1123a93bdf03487380b1aa',
    'data' => 
   array (
     'locatedSource' => 
@@ -174,9 +174,9 @@ return \PHPStan\Cache\CacheItem::__set_state(array(
                 'startLine' => 33,
                 'endLine' => 33,
                 'startTokenPos' => 80,
-                'startFilePos' => 598,
+                'startFilePos' => 630,
                 'endTokenPos' => 80,
-                'endFilePos' => 601,
+                'endFilePos' => 633,
               ),
             ),
             'type' => 
@@ -251,9 +251,9 @@ return \PHPStan\Cache\CacheItem::__set_state(array(
                 'startLine' => 40,
                 'endLine' => 40,
                 'startTokenPos' => 103,
-                'startFilePos' => 727,
+                'startFilePos' => 766,
                 'endTokenPos' => 103,
-                'endFilePos' => 730,
+                'endFilePos' => 769,
               ),
             ),
             'type' => 
@@ -289,9 +289,9 @@ return \PHPStan\Cache\CacheItem::__set_state(array(
                 'startLine' => 41,
                 'endLine' => 41,
                 'startTokenPos' => 112,
-                'startFilePos' => 757,
+                'startFilePos' => 797,
                 'endTokenPos' => 112,
-                'endFilePos' => 760,
+                'endFilePos' => 800,
               ),
             ),
             'type' => 

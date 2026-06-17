@@ -7,7 +7,7 @@ return \PHPStan\Cache\CacheItem::__set_state(array(
   array (
     'C:\\Users\\Sem\\Desktop\\travail\\Projets personnels\\Velt\\veltphp-kernel\\packages\\kernel\\src\\Application.php' => 
     array (
-      0 => 'eb3a099e45c000d077bdb3ee0e0ead4d9644bef46566ab534b802f108e6c26ed',
+      0 => 'b19b7b638fc4dddf1bc11d3cb3ea81aa6dd6829eecb0e21a7b3d792592796a9d',
       1 => 
       array (
         0 => 'velt\\kernel\\application',
@@ -51,7 +51,7 @@ return \PHPStan\Cache\CacheItem::__set_state(array(
     ),
     'C:\\Users\\Sem\\Desktop\\travail\\Projets personnels\\Velt\\veltphp-kernel\\packages\\kernel\\src\\Config\\ConfigRepository.php' => 
     array (
-      0 => 'c6ba7d235921401879c13f84b7b1fb14b752e6debee69be30ffc4d62e053823e',
+      0 => '8bf0a901bbd05e6d65f16e5a6faf093466349f34bf242aebc6b8836c217cfca3',
       1 => 
       array (
         0 => 'velt\\kernel\\config\\configrepository',
@@ -73,7 +73,7 @@ return \PHPStan\Cache\CacheItem::__set_state(array(
     ),
     'C:\\Users\\Sem\\Desktop\\travail\\Projets personnels\\Velt\\veltphp-kernel\\packages\\kernel\\src\\Container.php' => 
     array (
-      0 => 'ce794d36d2b9a3da96013ce2ab0a3e21615457c6858a4d678b6823113be0a873',
+      0 => '41f07fd366ed9e10c0256bb2506e6d77a7c810ec67605a6ac85db25ed7896814',
       1 => 
       array (
         0 => 'velt\\kernel\\container',
@@ -103,7 +103,7 @@ return \PHPStan\Cache\CacheItem::__set_state(array(
     ),
     'C:\\Users\\Sem\\Desktop\\travail\\Projets personnels\\Velt\\veltphp-kernel\\packages\\kernel\\src\\Contracts\\ApplicationInterface.php' => 
     array (
-      0 => '6f4d7bd7681f2911eb213c43cf7ea43fead420524b8ed327a2cc4f6bbdce3102',
+      0 => 'e3cae52ab1fa1a39638062cc9c95c1dca4299ad11d4111e303f466e61385b6cf',
       1 => 
       array (
         0 => 'velt\\kernel\\contracts\\applicationinterface',
@@ -155,7 +155,7 @@ return \PHPStan\Cache\CacheItem::__set_state(array(
     ),
     'C:\\Users\\Sem\\Desktop\\travail\\Projets personnels\\Velt\\veltphp-kernel\\packages\\kernel\\src\\Contracts\\CliRuntimeInterface.php' => 
     array (
-      0 => '2265f540c4a71f5867a0cc44eef788a7288d2a65efe06d37785a262b05e0ec37',
+      0 => '45ab6ed235e0948cf389b4f9dccb402b25f2d843c59a06eca98c41520fbda544',
       1 => 
       array (
         0 => 'velt\\kernel\\contracts\\cliruntimeinterface',
@@ -187,7 +187,7 @@ return \PHPStan\Cache\CacheItem::__set_state(array(
     ),
     'C:\\Users\\Sem\\Desktop\\travail\\Projets personnels\\Velt\\veltphp-kernel\\packages\\kernel\\src\\Contracts\\ConnectionInterface.php' => 
     array (
-      0 => 'e81845aca6291ab611669222d560ef976bbec4494d1754e08352165662c589ac',
+      0 => '879197ec4388f85df22b9a867bd7f97381e638de28d342a8e6a11b60fa6c6f5d',
       1 => 
       array (
         0 => 'velt\\kernel\\contracts\\connectioninterface',
@@ -226,7 +226,7 @@ return \PHPStan\Cache\CacheItem::__set_state(array(
     ),
     'C:\\Users\\Sem\\Desktop\\travail\\Projets personnels\\Velt\\veltphp-kernel\\packages\\kernel\\src\\Contracts\\DatabaseManagerInterface.php' => 
     array (
-      0 => '1a04983c3a3086e2339ba0404a69518602333960a0e051a3a1ad9dde59ae9278',
+      0 => '80720f3a41872f4d01a40a46d11ebf659e07b04bad6a618912071ad857e6af6c',
       1 => 
       array (
         0 => 'velt\\kernel\\contracts\\databasemanagerinterface',
@@ -244,7 +244,7 @@ return \PHPStan\Cache\CacheItem::__set_state(array(
     ),
     'C:\\Users\\Sem\\Desktop\\travail\\Projets personnels\\Velt\\veltphp-kernel\\packages\\kernel\\src\\Contracts\\DesktopPlatformInterface.php' => 
     array (
-      0 => 'd2b1b2b52c1cf29c3eb0a2504078d5c3ada584dc4b53f9e4ca76fe4e3c036e5c',
+      0 => '3ccb26d1ec5902a8dc947dad9ab458c5be805d03d1c4efe6df32bfb6417bca73',
       1 => 
       array (
         0 => 'velt\\kernel\\contracts\\desktopplatforminterface',
@@ -258,7 +258,7 @@ return \PHPStan\Cache\CacheItem::__set_state(array(
     ),
     'C:\\Users\\Sem\\Desktop\\travail\\Projets personnels\\Velt\\veltphp-kernel\\packages\\kernel\\src\\Contracts\\DriverInterface.php' => 
     array (
-      0 => 'f8d09d0898142b236b17e76e5d2776f97672cc0e58f1b92cfb1bd049a0c53562',
+      0 => '5c90fa3d1d71892424dce445395aae54208dc19b338c66fea31886f3849926b6',
       1 => 
       array (
         0 => 'velt\\kernel\\contracts\\driverinterface',
@@ -325,7 +325,7 @@ return \PHPStan\Cache\CacheItem::__set_state(array(
     ),
     'C:\\Users\\Sem\\Desktop\\travail\\Projets personnels\\Velt\\veltphp-kernel\\packages\\kernel\\src\\Contracts\\HttpRuntimeInterface.php' => 
     array (
-      0 => 'e87c679e8d9a2ada190a0a58593e20f4b10505c12661ab1a9d148591f04cfe08',
+      0 => '346cb02c23c6a3cb2f829b9862932e6b8eb12415a467a6935db9be64af976b31',
       1 => 
       array (
         0 => 'velt\\kernel\\contracts\\httpruntimeinterface',
@@ -354,7 +354,7 @@ return \PHPStan\Cache\CacheItem::__set_state(array(
     ),
     'C:\\Users\\Sem\\Desktop\\travail\\Projets personnels\\Velt\\veltphp-kernel\\packages\\kernel\\src\\Contracts\\MobilePlatformInterface.php' => 
     array (
-      0 => 'a04b0c27ed034b75ac24bb8efd8ddb38f943148c38577ee55ace52eeabf70517',
+      0 => '32e3c6ede7c5551f916bc8dcb30720fc7a58098057e33a9287965012c74110e5',
       1 => 
       array (
         0 => 'velt\\kernel\\contracts\\mobileplatforminterface',
@@ -368,7 +368,7 @@ return \PHPStan\Cache\CacheItem::__set_state(array(
     ),
     'C:\\Users\\Sem\\Desktop\\travail\\Projets personnels\\Velt\\veltphp-kernel\\packages\\kernel\\src\\Contracts\\PlatformInterface.php' => 
     array (
-      0 => 'ab8dd0ccc68bb2c9f7299c813b8e33f7e20a46861f82c52f3041ef388b955afe',
+      0 => 'cc781fcf53f407cb93b1f51393274efad911ae2f40c3e06e64cf216f5f2f8a51',
       1 => 
       array (
         0 => 'velt\\kernel\\contracts\\platforminterface',
@@ -399,7 +399,7 @@ return \PHPStan\Cache\CacheItem::__set_state(array(
     ),
     'C:\\Users\\Sem\\Desktop\\travail\\Projets personnels\\Velt\\veltphp-kernel\\packages\\kernel\\src\\Contracts\\RuntimeInterface.php' => 
     array (
-      0 => '0ad487e11174fa002a90815be1b8b56d1d0f1ed578eccb500df9cf24df13c871',
+      0 => '836054a0eb21cb628cc980e89f165578452142125a1123a93bdf03487380b1aa',
       1 => 
       array (
         0 => 'velt\\kernel\\contracts\\runtimeinterface',
@@ -436,7 +436,7 @@ return \PHPStan\Cache\CacheItem::__set_state(array(
     ),
     'C:\\Users\\Sem\\Desktop\\travail\\Projets personnels\\Velt\\veltphp-kernel\\packages\\kernel\\src\\Contracts\\WorkerLifecycleEventsInterface.php' => 
     array (
-      0 => '31659fe44269c46bcf7a1ceb418bd147a9235ce74219ec6942cf031130966d99',
+      0 => 'ff63c3e2410add704687fce50b17b405f7adb4c2589040ea4acb650ee8f03463',
       1 => 
       array (
         0 => 'velt\\kernel\\contracts\\workerlifecycleeventsinterface',
@@ -450,7 +450,7 @@ return \PHPStan\Cache\CacheItem::__set_state(array(
     ),
     'C:\\Users\\Sem\\Desktop\\travail\\Projets personnels\\Velt\\veltphp-kernel\\packages\\kernel\\src\\Env\\EnvRepository.php' => 
     array (
-      0 => '35507e274ba674c1895bccb6c2163eba5da6c6e2344ed72b45d41fb8a7cef747',
+      0 => '7c30e72e42b0ea4ffc60328a17fa0993d86a0c22e745f663dfd62806460bf56c',
       1 => 
       array (
         0 => 'velt\\kernel\\env\\envrepository',

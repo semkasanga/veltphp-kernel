@@ -27,5 +27,8 @@ phpunit.xml.cache
 # Documentation local
 docs/local/*
 
+# Generated files
+var/*
+
 # Directive
 .ia/*
